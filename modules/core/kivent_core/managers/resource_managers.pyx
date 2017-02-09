@@ -661,6 +661,8 @@ cdef class TextureManager(GameManager):
         for imgname in atlas_data:
             texture = CoreImage(
                 path.join(dirname,imgname), nocache=True).texture
+            texture.mag_filter = 'nearest'
+            texture.min_filter = 'nearest'
             name = str(path.basename(imgname))
             size = texture.size
             w = <float>size[0]

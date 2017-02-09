@@ -151,7 +151,7 @@ def init_entities_from_map(tile_map, init_entity):
                     }
                 systems = ['position','color', renderer_name]
 
-            init_entity(comp_data, systems)
+#            init_entity(comp_data, systems)
 
 def parse_tmx(filename, gameworld):
     '''
@@ -362,8 +362,8 @@ def _load_tile_map(layers, width, tile_properties):
             tile_layer_count += 1
             tile_zindex.append(i)
         elif type(layer) == ObjectGroup:
-            color = get_color_from_hex(layer.color)
-            color = (color[0]*255, color[1]*255, color[2]*255, 255)
+            # color = get_color_from_hex(layer.color)
+            color = (255, 255, 255, 255)
             for n, obj in enumerate(layer.objects):
                 if obj.gid:
                     tile_ids.add(obj.gid)
