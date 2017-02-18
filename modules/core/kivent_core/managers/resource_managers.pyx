@@ -121,7 +121,8 @@ cdef class ModelManager(GameManager):
             model_name (str): The name of the model that entity was registered
             with.
         '''
-        del self._model_register[model_name][entity_id]
+        if model_name in self._model_register:
+            del self._model_register[model_name][entity_id]
 
     def pickle_model(self, str model_name, str directory_name):
         '''
@@ -581,6 +582,7 @@ cdef class TextureManager(GameManager):
     def load_texture(self, name, texture):
         name = str(name)
         if name in self._keys:
+            # pass
             raise KeyError()
         else:
             key_count = self._key_count
@@ -600,6 +602,7 @@ cdef class TextureManager(GameManager):
             raise KeyError()
         else:
             key_index = self._keys[name]
+            print('self._groups looks like:', self._groups)
             texture_keys = self._groups[key_index]
             for key in texture_keys:
                 name = self._key_index[key]

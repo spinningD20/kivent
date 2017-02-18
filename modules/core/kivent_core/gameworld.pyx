@@ -595,8 +595,8 @@ class GameWorld(Widget):
         cdef SystemManager system_manager = self.system_manager
         systems = system_manager.system_index
         if isinstance(widget, GameSystem):
-            if widget.system_id not in systems and (
-                widget not in self.systems_to_add):
+            print('598!', self.systems_to_add, widget, widget.system_id, systems)
+            if widget.system_id not in systems and (widget not in self.systems_to_add):
                 Clock.schedule_once(lambda dt: self.add_system(widget))
         if not (isinstance(widget, Widget) or isinstance(widget, CWidget)):
             raise WidgetException(
