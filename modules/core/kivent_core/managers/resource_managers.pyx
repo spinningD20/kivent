@@ -581,20 +581,20 @@ cdef class TextureManager(GameManager):
 
     def load_texture(self, name, texture):
         name = str(name)
-        if name in self._keys:
-            # pass
-            raise KeyError()
-        else:
-            key_count = self._key_count
-            self._textures[key_count] = texture
-            size = texture.size
-            self._sizes[key_count] = size
-            self._keys[name] = key_count
-            self._key_index[key_count] = name
-            self._texkey_index[key_count] = key_count
-            self._uvs[key_count] = [0., 0., 1., 1.]
-            self._groups[key_count] = [key_count]
-            self._key_count += 1
+        # if name in self._keys:
+        #     pass
+        #     raise KeyError()
+        # else:
+        key_count = self._key_count
+        self._textures[key_count] = texture
+        size = texture.size
+        self._sizes[key_count] = size
+        self._keys[name] = key_count
+        self._key_index[key_count] = name
+        self._texkey_index[key_count] = key_count
+        self._uvs[key_count] = [0., 0., 1., 1.]
+        self._groups[key_count] = [key_count]
+        self._key_count += 1
         return key_count
 
     def unload_texture(self, name):
