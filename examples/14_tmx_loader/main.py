@@ -10,7 +10,6 @@ from kivent_maps import map_utils
 from kivent_maps.map_system import MapSystem
 
 Window.size = (640, 640)
-from kivent_core.managers import system_manager
 
 
 def get_asset_path(asset, asset_loc):
@@ -20,12 +19,12 @@ def get_asset_path(asset, asset_loc):
 class Game(Widget):
     def __init__(self, **kwargs):
         super(Game, self).__init__(**kwargs)
-        self.do_map_init()
-        self.map_list = ['isometric.tmx', 'hexagonal.tmx', 'orthogonal.tmx']
+        self.map_list = ['orthogonal.tmx', 'ortho2.tmx', 'ortho3.tmx']
         self.index = 0
+        self.do_map_init()
         # Init gameworld with all the systems
         self.gameworld.init_gameworld(
-            ['position', 'color', 'camera1', 'tile_map'] + self.map_layers,
+            ['position', 'color', 'camera1', 'tile_map'] + self.map_layers + self.map_layer_animators,
             callback=self.init_game)
 
     def do_map_init(self):
@@ -50,14 +49,18 @@ class Game(Widget):
 
         # Initialise systems for 4 map layers and get the renderer and
         # animator names
-        r, a = map_utils.load_map_systems(4, self.gameworld, map_render_args, map_anim_args, map_poly_args)
-        self.map_layers = r + a
+        self.map_layers, self.map_layer_animators = \
+            map_utils.load_map_systems(6, self.gameworld,
+            map_render_args, map_anim_args,
+            map_poly_args)
+        # r, a = map_utils.load_map_systems(6, self.gameworld, map_render_args, map_anim_args, map_poly_args)
+        # self.map_layers = r + a
         # Set the camera1 render order to render lower layers first
         self.camera1.render_system_order = reversed(self.map_layers)
 
     def init_game(self):
         self.setup_states()
-        self.setup_tile_map('isometric.tmx')
+        self.setup_tile_map('orthogonal.tmx')
         self.set_state()
 
     def setup_tile_map(self, map_name):
@@ -70,21 +73,15 @@ class Game(Widget):
         map_name = map_utils.parse_tmx(filename, self.gameworld)
 
         # Initialise each tile as an entity in the gameworld
-        Clock.schedule_once(lambda *x: map_utils.init_entities_from_map(map_manager.maps[map_name],
-                                       self.gameworld.init_entity))
-
+        map_utils.init_entities_from_map(map_manager.maps[map_name], self.gameworld.init_entity)
         self.tilemap = map_manager.maps[map_name]
 
     def setup_states(self):
         # We want renderers to be added and unpaused
         # and animators to be unpaused
         self.gameworld.add_state(state_name='main',
-                systems_added=self.map_layers,
-                systems_unpaused=self.map_layers)
-
-        self.gameworld.add_state(state_name='loading',
-                                 systems_added=[],
-                             systems_removed=self.map_layers)
+                systems_added=self.map_layers + self.map_layer_animators,
+                systems_unpaused=self.map_layers + self.map_layer_animators)
 
     def set_state(self):
         self.gameworld.state = 'main'
@@ -92,7 +89,7 @@ class Game(Widget):
     def screen_touched(self, event):
         self.index += 1
         self.gameworld.clear_entities()
-        for layer in self.map_layers:
+        for layer in self.map_layers + self.map_layer_animators:
             self.gameworld.system_manager[layer].clear_entities()
         self.gameworld.systems_to_add = []
         self.setup_tile_map(self.map_list[self.index % 3])

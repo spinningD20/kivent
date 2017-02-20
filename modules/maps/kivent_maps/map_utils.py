@@ -92,7 +92,7 @@ def init_entities_from_map(tile_map, init_entity):
 
     '''
     z_map = tile_map.z_index_map
-
+    print('initing from', tile_map)
     # Load tile entities
     for j in range(tile_map.size[1]):
         for i in range(tile_map.size[0]):
@@ -171,34 +171,35 @@ def parse_tmx(filename, gameworld):
     model_manager = gameworld.managers['model_manager']
     map_manager = gameworld.managers['map_manager']
     animation_manager = gameworld.managers['animation_manager']
-
-    # Get tilemap object with all the data from tmx
-    tilemap = tmx.TileMap.load(filename)
-
-    # Get the tiles as a 3D list and the z_map, objects as a 2D list and the
-    # z_map, the set of tile_ids which will be used in the map,
-    # set of models of the objects in the map.
-    tiles, tiles_z, objects, objects_z, tile_ids, objmodels = \
-            _load_tile_map(tilemap.layers, tilemap.width,
-                           _load_tile_properties(tilemap.tilesets))
-
-    # Loads the models, textures and animations of the tileset into
-    # corresponding managers
-    _load_tilesets(tilemap.tilesets, dirname(filename), tile_ids,
-                   texture_manager.load_atlas,
-                   model_manager.load_textured_rectangle,
-                   animation_manager.load_animation)
-
-    # Load the object models with model_manager
-    _load_obj_models(objmodels, model_manager.load_textured_rectangle,
-                     model_manager.load_model)
-
-    # Load the map with map_manager
     name ='.'.join(basename(filename).split('.')[:-1])
-    map_manager.load_map(name, tilemap.width, tilemap.height,
-                         tiles, len(tiles_z),
-                         objects, sum([len(o) for o in objects]),
-                         tilemap.orientation)
+    if not map_manager.maps.get(name):
+        print('loading tilemap(')
+        # Get tilemap object with all the data from tmx
+        tilemap = tmx.TileMap.load(filename)
+
+        # Get the tiles as a 3D list and the z_map, objects as a 2D list and the
+        # z_map, the set of tile_ids which will be used in the map,
+        # set of models of the objects in the map.
+        tiles, tiles_z, objects, objects_z, tile_ids, objmodels = \
+                _load_tile_map(tilemap.layers, tilemap.width,
+                               _load_tile_properties(tilemap.tilesets))
+
+        # Loads the models, textures and animations of the tileset into
+        # corresponding managers
+        _load_tilesets(tilemap.tilesets, dirname(filename), tile_ids,
+                       texture_manager.load_atlas,
+                       model_manager.load_textured_rectangle,
+                       animation_manager.load_animation)
+
+        # Load the object models with model_manager
+        _load_obj_models(objmodels, model_manager.load_textured_rectangle,
+                         model_manager.load_model)
+
+        # Load the map with map_manager
+        map_manager.load_map(name, tilemap.width, tilemap.height,
+                             tiles, len(tiles_z),
+                             objects, sum([len(o) for o in objects]),
+                             tilemap.orientation)
 
     # Set the extra map properties for hexagonal/staggered maps
     loaded_map = map_manager.maps[name]

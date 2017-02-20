@@ -565,7 +565,7 @@ cdef class TextureManager(GameManager):
         name = path.splitext(path.basename(source))[0]
         name = str(name)
         if name in self._keys:
-            raise KeyError()
+            return self._keys[name]
         else:
             key_count = self._key_count
             size = texture.size
@@ -581,25 +581,25 @@ cdef class TextureManager(GameManager):
 
     def load_texture(self, name, texture):
         name = str(name)
-        # if name in self._keys:
-        #     pass
-        #     raise KeyError()
-        # else:
-        key_count = self._key_count
-        self._textures[key_count] = texture
-        size = texture.size
-        self._sizes[key_count] = size
-        self._keys[name] = key_count
-        self._key_index[key_count] = name
-        self._texkey_index[key_count] = key_count
-        self._uvs[key_count] = [0., 0., 1., 1.]
-        self._groups[key_count] = [key_count]
-        self._key_count += 1
-        return key_count
+        if name in self._keys:
+            return self._keys[name]
+        else:
+            key_count = self._key_count
+            self._textures[key_count] = texture
+            size = texture.size
+            self._sizes[key_count] = size
+            self._keys[name] = key_count
+            self._key_index[key_count] = name
+            self._texkey_index[key_count] = key_count
+            self._uvs[key_count] = [0., 0., 1., 1.]
+            self._groups[key_count] = [key_count]
+            self._key_count += 1
+            return key_count
 
     def unload_texture(self, name):
         if name not in self._keys:
-            raise KeyError()
+            pass
+            # raise KeyError()
         else:
             key_index = self._keys[name]
             print('self._groups looks like:', self._groups)
@@ -615,7 +615,7 @@ cdef class TextureManager(GameManager):
             del self._textures[key_index]
 
     def get_texkey_from_name(self, name):
-        return self._keys[name]
+        return self._keys.get(name)
 
     def get_uvs(self, tex_key):
         return self._uvs[tex_key]
@@ -633,8 +633,8 @@ cdef class TextureManager(GameManager):
         return self._textures[tex_key]
 
     def get_texture_by_name(self, name):
-        tex_key = self._keys[name]
-        if tex_key == <unsigned int>-1:
+        tex_key = self._keys.get(name)
+        if tex_key == <unsigned int>-1 or tex_key is None:
             return None
         return self._textures[tex_key]
 
@@ -671,7 +671,10 @@ cdef class TextureManager(GameManager):
             w = <float>size[0]
             h = <float>size[1]
             atlas_content = atlas_data[imgname]
-            atlas_key = self.load_texture(name, texture)
+            if not self.get_texture_by_name(name):
+                atlas_key = self.load_texture(name, texture)
+            else:
+                atlas_key = self._keys[name]
             group_list = self._groups[atlas_key]
             group_list_a = group_list.append
             for key in atlas_content:
